@@ -1,0 +1,251 @@
+/*body {
+    margin: 0;
+    padding: 1.5rem 1.2rem;
+    overflow: hidden;
+    font-family: monospace;
+    font-size: 24px;
+    line-height: 36px;
+}
+
+#editor-wrapper {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.2rem;
+    bottom: 1.5rem;
+    left: 1.2rem;
+    margin: 0;
+    background: #f45c1a;
+}
+
+#editor {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: 0;
+    font-size: 24px;
+    line-height: 36px;
+    color: #444;
+    background: #D0EACC;
+    -webkit-transition: bottom 0.4s ease-in;
+}
+
+.ace_gutter {
+    display: none;
+}
+
+.ace_disallowed,
+.ace_disallowed + .ace_suffix {
+    color: #f45c1a;
+}
+
+h1 {
+    visibility: hidden;
+}
+
+#erroneous {
+    position: absolute;
+    bottom: 0;
+}
+
+#erroneous a {
+    display: inline-block;
+    padding: 0.2em 0.4em;
+    border: 2px solid #D0EACC;
+    border-left-width: 0;
+    color: #D0EACC;
+    cursor: pointer;
+}
+*/
+body {
+    margin: 0;
+    overflow: hidden;
+    font-size: 20px;
+    line-height: 36px;
+    background: #96a8c8;
+}
+
+.xkcd-box {
+    box-sizing: border-box;
+    border: 1.5px solid #071419;
+    border-radius: 12px;
+    background: white;
+}
+
+.xkcd-box-title {
+    margin: 0.5rem 1rem;
+    font-family: Lucida,Helvetica,sans-serif;
+    font-size: 24px;
+    font-variant: small-caps;
+}
+
+.xkcd-box-titlemain {
+    margin: 0.5rem 1rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0;
+    font-family: Lucida,Helvetica,sans-serif;
+    font-size: 24px;
+    font-size: 36px;
+    font-variant: small-caps;
+}
+
+#masthead {
+    margin: 1.5rem 1.2rem;
+    overflow: auto;
+}
+
+#masthead img {
+    float: left;
+    margin: 1em;
+}
+
+#masthead h3 {
+    font-style: italic;
+}
+
+#masthead a,
+#masthead a:visited {
+    text-decoration: none;
+    color: #96A8C8;
+}
+
+#masthead a:hover,
+#masthead a:visited:hover {
+    text-decoration: underline;
+}
+
+/*#editor-wrapper {
+    position: absolute;
+    top: 9.8rem;
+    right: 1.2rem;
+    bottom: 1.5rem;
+    left: 1.2rem;
+    margin: 0;
+}*/
+
+#editor-wrapper {
+    position: absolute;
+    top: 1.5rem;
+    /*right: 1.2rem;*/
+    right: 25rem;
+    bottom: 3.5rem;
+    left: 1.2rem;
+    margin: 0;
+    /*background: #f45c1a;*/
+}
+
+#editor {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    bottom: 0.5rem;
+    left: 0.5rem;
+    margin: 0;
+    font-size: 14pt;
+    /*font-size: 20px;*/
+    line-height: 36px;
+    color: #000;
+    /*color: #444;*/
+    /*background: #D0EACC;*/
+    -webkit-transition: bottom 0.4s ease-in;
+}
+
+/*#editor {
+    position: absolute;
+    top: 3.5rem;
+    right: 1.2rem;
+    bottom: 1.5rem;
+    left: 1.2rem;
+    margin: 0;
+    font-size: 20px;
+    line-height: 36px;
+    color: #000;
+    -webkit-transition: bottom 0.4s ease-in;
+}*/
+
+.ace_gutter {
+    display: none;
+}
+
+.ace_disallowed,
+.ace_disallowed + .ace_suffix {
+    color: #c00;
+}
+
+.ace-tm .ace_print-margin {
+    background: transparent!important;
+}
+
+#erroneous-wrapper {
+    display: none;
+    z-index: 1000;
+    position: fixed;
+    right: 1.2rem;
+    bottom: 1.5rem;
+    left: 1.2rem;
+    background: #96a8c8;
+}
+
+#erroneous-wrapper.invalid {
+    display: block;
+}
+
+#erroneous-mask {
+    box-sizing: border-box;
+    width: 100%;
+    height: 13px;
+    margin-bottom: 0.5rem;
+    border: 1.5px solid #071419;
+    border-radius: 12px;
+    border-radius: 0 0 12px 12px;
+    border-top-width: 0;
+    background: white;
+}
+
+#erroneous {
+    margin: 0 1rem 1.5rem;
+    max-height: 10rem;
+    overflow: scroll;
+    overflow-x: hidden;
+    font-family: 'Monaco','Menlo','Ubuntu Mono','Consolas','source-code-pro',monospace;
+}
+
+#erroneous a {
+    display: inline-block;
+    padding: 0.2rem 0.4rem;
+    border-left-width: 0;
+    color: #c00;
+    cursor: pointer;
+}
+
+#erroneous a:hover {
+    color: #fff;
+    background: #c00;
+}
+
+#stats-wrapper {
+    position: fixed;
+    right: 0.1rem;
+    top: 2rem;
+    width: 24rem;
+    font-size: 10pt;
+}
+
+#stats {
+    background: white;
+    margin: 0 1rem 1.5rem;
+    /*max-height: 10rem;*/
+    overflow: auto;
+    font-family: 'Monaco','Menlo','Ubuntu Mono','Consolas','source-code-pro',monospace;
+   /*overflow-x: hidden;*/
+}
+
+table {
+    border-collapse: collapse;
+}
+
+table, th, td {
+    border: 1px solid black;
+    padding: 5px;
+}

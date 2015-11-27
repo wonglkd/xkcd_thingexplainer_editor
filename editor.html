@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-7s5uDGW3AHqw6xtJmNNtr+OBRJUlgkNJEo78P4b0yRw= sha512-nNo+yCHEyn0smMxSswnf/OnX6/KwJuZTlNZBjauKhTK0c+zT+q5JOCx0UFhXQ6rJR9jg6Es8gPuD2uZcYDLqSw==" crossorigin="anonymous"> -->
+    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha256-KXn5puMvxCw+dAYznun+drMdG1IFl3agK0p/pqT9KAo= sha512-2e8qq0ETcfWRI4HJBzQiA3UoyFk6tbNyG+qSaIBZLyW9Xf3sWZHN/lxe9fTh1U45DpPf07yj94KsUHHWe4Yk1A==" crossorigin="anonymous"></script> -->
+    <link rel="stylesheet" href="main.css">
+
+    <title>upwriter scorer</title>
+  </head>
+  <body>
+    <div id="editor-wrapper" class='xkcd-box'>
+      <div id="editor"></div>
+    </div>
+
+    <div id='stats-wrapper' class='xkcd-box'>
+      <div id='stats'></div>
+    </div>
+
+
+    <div id="erroneous-wrapper">
+      <div id="erroneous-mask"></div>
+      <div id="erroneous-wrapper-inner" class="xkcd-box">
+        <h2 class="xkcd-box-title">You Used Some Less Simple Words</h2>
+        <div id="erroneous"></div>
+      </div>
+    </div>
+
+
+    <script src="words.js"></script>
+    <script src="data.js"></script>
+    <script src="ace/src/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script>var editor = ace.edit("editor");
+var session = editor.getSession();
+session.setMode("ace/mode/upwriter");
+session.setUseWrapMode(true);
+session.setTabSize(0);
+// everyone wants Ctrl-L and Cmd-L to go to the address bar
+editor.commands.removeCommand('gotoline');
+editor.focus();
+
+var editorElement = document.getElementById('editor');
+var erroneousWrapper = document.getElementById('erroneous-wrapper');
+var erroneous = document.getElementById('erroneous');
+var stats = document.getElementById('stats');
+
+erroneous.addEventListener('click', function(e) {
+  if (e.target.tagName.toLowerCase() === "a") {
+    editor.find(e.target.innerText);
+    editor.findAll(e.target.innerText);
+    editor.focus();
+  }
+});
+
+session.on('changeMode', function() {
+  session.getMode().onRecalculateAllowed(editor, function(d) {
+    erroneous.innerHTML = d.map(function(word) {
+      return '<a>' + word + '</a>';
+    }).join('');
+    erroneousWrapper.classList[d.length > 0 ? 'add' : 'remove']('invalid');
+    editorElement.style.bottom = erroneous.clientHeight + 'px';
+  });
+
+  session.getMode().onScoringAllowed(editor, function(d) {
+    // stats.innerHTML = JSON.stringify(d.scores, null, 0);
+    var total_score = 0;
+    stats.innerHTML = "";
+    stats.innerHTML += "Words: " + d.words + "<br>";
+    stats.innerHTML += "Sentences: " + d.sentences + "<br>";
+    genStr = "<table class='table-bordered'>";
+    genStr += "<tr><th>Prop</th><th>Score</th><th>Max</th><th>Raw</th><th>Info</th></tr>";
+    for (var prop in d.scores) {
+      score = Math.round(d.scores[prop].score*100)/100;
+      maxScore = Math.round(d.scores[prop].max*100)/100;
+      ratio = score/maxScore;
+      total_score += score;
+      genStr += "<tr>";
+      genStr += "<td>"+prop+"</td>";
+      genStr += "<td style='background-color:rgb("+ Math.round((1-ratio)*255) + ", " + Math.round(ratio*255)+ ", 0)'>"+score+"</td>";
+      genStr += "<td>"+maxScore+"</td>";
+      genStr += "<td>"+Math.round(d.scores[prop].raw*100)/100+"</td>";
+      genStr += "<td>"+(d.scores[prop].extra_info?d.scores[prop].extra_info:'')+"</td>";
+      genStr += "</tr>";
+    }
+    genStr += "</table>";
+    stats.innerHTML += "Score: " + total_score + " <br>";
+    stats.innerHTML += genStr;
+  });
+
+});
+
+window.onbeforeunload = function() {
+  return 'Saved your work?';
+}
+
+</script></body></html>
