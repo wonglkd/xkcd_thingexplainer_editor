@@ -223,8 +223,6 @@ Mode.prototype.getStats = function(editor) {
   }
 
   // END.
-  // console.log(tokens);
-  // console.log(sentences);
 
   return {
     "words": only_words.length,
@@ -242,19 +240,19 @@ Mode.prototype.getStats = function(editor) {
         "raw": longest_run.length,
         "score": 3 * Math.sqrt(longest_run.length),
         "max": 3 * Math.sqrt(250),
-        "extra_info": longest_run.join(" "),
+        "extra_info": "<a>"+longest_run.join(" ")+"</a>",
       },
       "element_run": {
         "raw": max_element_run.length,
         "score": Math.log(118) * Math.sqrt(max_element_run.length),
         "max": Math.log(118) * Math.sqrt(__FILTERED_ELEMENTS.length),
-        "extra_info": max_element_run.join(" "),
+        "extra_info": "<a>" + max_element_run.join(" ") + "</a>",
       },
       "pi_run": {
         "raw": max_pi_run,
         "score": Math.PI * Math.sqrt(max_pi_run),
         "max": Math.PI * Math.sqrt(250),
-        "extra_info": only_words.slice(max_pi_run_start, max_pi_run_start+max_pi_run).join(" "),
+        "extra_info": "<a>"+only_words.slice(max_pi_run_start, max_pi_run_start+max_pi_run).join(" ")+"</a>",
       },
       "odd_cnt": {
         "raw": odd_cnt,

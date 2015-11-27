@@ -212,7 +212,7 @@ body {
     font-family: 'Monaco','Menlo','Ubuntu Mono','Consolas','source-code-pro',monospace;
 }
 
-#erroneous a {
+#erroneous a, #stats a {
     display: inline-block;
     padding: 0.2rem 0.4rem;
     border-left-width: 0;
@@ -220,7 +220,7 @@ body {
     cursor: pointer;
 }
 
-#erroneous a:hover {
+#erroneous a:hover, #stats a:hover {
     color: #fff;
     background: #c00;
 }
