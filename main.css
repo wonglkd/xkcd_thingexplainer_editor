@@ -208,6 +208,7 @@ body {
     max-height: 10rem;
     overflow: scroll;
     overflow-x: hidden;
+    font-size: 10pt;
     font-family: 'Monaco','Menlo','Ubuntu Mono','Consolas','source-code-pro',monospace;
 }
 

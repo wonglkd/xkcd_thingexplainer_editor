@@ -83,7 +83,7 @@ Mode.prototype.getStats = function(editor) {
   function isWord(tk) {
     return tk.type == "allowed" || tk.type == "disallowed";
   }
-  var only_words = tokens.filter(isWord);
+  var only_words = tokens.filter(isWord).map(function (x) { return x.value; });
 
   // Get sentences.
   var sentences_with_punc = [[]];
@@ -132,13 +132,13 @@ Mode.prototype.getStats = function(editor) {
   var longest_run = [];
   var current_run = [];
   if (only_words.length > 0) {
-    current_run.push(only_words[0].value);
+    current_run.push(only_words[0]);
   }
   for (var i = 1; i < only_words.length; i++) {
-    if (only_words[i-1].value.toLowerCase() < only_words[i].value.toLowerCase()) {
-      current_run.push(only_words[i].value);
+    if (only_words[i-1].toLowerCase() < only_words[i].toLowerCase()) {
+      current_run.push(only_words[i]);
     } else {
-      current_run = [only_words[i].value];
+      current_run = [only_words[i]];
     }
     if (longest_run.length < current_run.length) {
       longest_run = current_run;
@@ -151,8 +151,8 @@ Mode.prototype.getStats = function(editor) {
   var max_element_run = [];
   var curr_element_run = [];
   for (var i = 0; i < only_words.length; i++) {
-    if (filtered_elements.indexOf(only_words[i].value.toLowerCase()) > -1) {
-      curr_element_run.push(only_words[i].value);
+    if (filtered_elements.indexOf(only_words[i].toLowerCase()) > -1) {
+      curr_element_run.push(only_words[i]);
     } else {
       curr_element_run = [];
     }
@@ -161,18 +161,38 @@ Mode.prototype.getStats = function(editor) {
     }
   }
 
+  // pi-run.
+  var len_str = "";
+  for (var i = 0; i < only_words.length; i++) {
+    len_str += (only_words[i].length%10).toString();
+  }
+  var pi_str = "3141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067982148086513282306647093844609550582231725359408128481117450284102701938521105559644622948954930381964428810975665933446128475648233786783165271201909";
+  var max_pi_run = 0;
+  var max_pi_run_start = 0;
+  for (max_pi_run = 0; max_pi_run < pi_str.length; max_pi_run++) {
+    var idx = len_str.indexOf(pi_str.substring(0, max_pi_run+1));
+    if (idx == -1) {
+      break;
+    } else {
+      max_pi_run_start = idx;
+    }
+  }
+  if (max_pi_run == pi_str.length) {
+    window.alert("Max Pi reached! Contact developer.");
+  }
+
+
   // n-letter words.
   var bucket_words = [];
   for (var i = 1; i <= 14; i++) {
     bucket_words[i] = 0;
   }
   for (var i = 0; i < only_words.length; i++) {
-    bucket_words[only_words[i].value.length]++;
+    bucket_words[only_words[i].length]++;
   }
   for (var sc_n_letter_words = 14; sc_n_letter_words > 0; sc_n_letter_words--) {
     if (bucket_words[sc_n_letter_words] == sc_n_letter_words) break;
   }
-
 
   // Letters of alphabet.
   var buckets = [];
@@ -180,7 +200,7 @@ Mode.prototype.getStats = function(editor) {
     buckets[String.fromCharCode(i)] = 0;
   }
   for (var i = 1; i < only_words.length; i++) {
-    var word = only_words[i].value.toUpperCase();
+    var word = only_words[i].toUpperCase();
     for (var j = 0; j < word.length; j++) {
       var ch = word.charAt(j)
       buckets[ch]++;
@@ -229,6 +249,12 @@ Mode.prototype.getStats = function(editor) {
         "score": Math.log(118) * Math.sqrt(max_element_run.length),
         "max": Math.log(118) * Math.sqrt(__FILTERED_ELEMENTS.length),
         "extra_info": max_element_run.join(" "),
+      },
+      "pi_run": {
+        "raw": max_pi_run,
+        "score": Math.PI * Math.sqrt(max_pi_run),
+        "max": Math.PI * Math.sqrt(250),
+        "extra_info": only_words.slice(max_pi_run_start, max_pi_run_start+max_pi_run).join(" "),
       },
       "odd_cnt": {
         "raw": odd_cnt,

@@ -20,7 +20,7 @@
     <div id="erroneous-wrapper">
       <div id="erroneous-mask"></div>
       <div id="erroneous-wrapper-inner" class="xkcd-box">
-        <h2 class="xkcd-box-title">You Used Some Less Simple Words</h2>
+        <h3 class="xkcd-box-title">You Used Some Less Simple Words</h3>
         <div id="erroneous"></div>
       </div>
     </div>
@@ -51,6 +51,10 @@ erroneous.addEventListener('click', function(e) {
   }
 });
 
+function round2dp(n) {
+  return Math.round(n*100)/100;
+}
+
 session.on('changeMode', function() {
   session.getMode().onRecalculateAllowed(editor, function(d) {
     erroneous.innerHTML = d.map(function(word) {
@@ -69,20 +73,20 @@ session.on('changeMode', function() {
     genStr = "<table class='table-bordered'>";
     genStr += "<tr><th>Prop</th><th>Score</th><th>Max</th><th>Raw</th><th>Info</th></tr>";
     for (var prop in d.scores) {
-      score = Math.round(d.scores[prop].score*100)/100;
-      maxScore = Math.round(d.scores[prop].max*100)/100;
+      score = round2dp(d.scores[prop].score);
+      maxScore = round2dp(d.scores[prop].max);
       ratio = score/maxScore;
       total_score += score;
       genStr += "<tr>";
       genStr += "<td>"+prop+"</td>";
       genStr += "<td style='background-color:rgb("+ Math.round((1-ratio)*255) + ", " + Math.round(ratio*255)+ ", 0)'>"+score+"</td>";
       genStr += "<td>"+maxScore+"</td>";
-      genStr += "<td>"+Math.round(d.scores[prop].raw*100)/100+"</td>";
+      genStr += "<td>"+round2dp(d.scores[prop].raw)+"</td>";
       genStr += "<td>"+(d.scores[prop].extra_info?d.scores[prop].extra_info:'')+"</td>";
       genStr += "</tr>";
     }
     genStr += "</table>";
-    stats.innerHTML += "Score: " + total_score + " <br>";
+    stats.innerHTML += "Score: " + round2dp(total_score) + " <br>";
     stats.innerHTML += genStr;
   });
 
