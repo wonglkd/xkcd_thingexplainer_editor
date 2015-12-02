@@ -181,7 +181,7 @@ body {
     display: none;
     z-index: 1000;
     position: fixed;
-    right: 1.2rem;
+    right: 25rem;
     bottom: 1.5rem;
     left: 1.2rem;
     background: #96a8c8;
@@ -208,7 +208,7 @@ body {
     max-height: 10rem;
     overflow: scroll;
     overflow-x: hidden;
-    font-size: 10pt;
+    font-size: 8pt;
     font-family: 'Monaco','Menlo','Ubuntu Mono','Consolas','source-code-pro',monospace;
 }
 

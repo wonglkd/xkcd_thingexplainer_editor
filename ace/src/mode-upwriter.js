@@ -43,6 +43,20 @@ var oop = require("../lib/oop");
 var TextMode = require("./text").Mode;
 var UpwriterHighlightRules = require("./upwriter_highlight_rules").UpwriterHighlightRules;
 
+var langTools = ace.require("ace/ext/language_tools");
+var valid_words = window.__WORDS.split("|");
+var valid_words_obj = valid_words.map(function (a){ return {"name": a, "value": a}; })
+langTools.setCompleters([{
+  getCompletions: function(editor, session, pos, prefix, callback) {
+    callback(null, valid_words_obj)
+  }
+}]);
+editor.setOptions({
+  enableBasicAutocompletion: true,
+  enableLiveAutocompletion: false
+});
+
+
 var Mode = function() {
     this.HighlightRules = UpwriterHighlightRules;
 };
@@ -67,7 +81,7 @@ Mode.prototype.$id = "ace/mode/upwriter";
 // };
 
 Mode.prototype.getStats = function(editor) {
-  let session = editor.getSession();
+  var session = editor.getSession();
 
   var valid_words = window.__WORDS.split("|");
 
@@ -88,7 +102,7 @@ Mode.prototype.getStats = function(editor) {
   // Get sentences.
   var sentences_with_punc = [[]];
   var sentences_wout_punc = [[]];
-  var end_of_sentence = ['.', '?'];
+  var end_of_sentence = ['.', '?', '!'];
   for (var i = 0; i < tokens.length; i++) {
     if (end_of_sentence.some(function (a) { return tokens[i].value.indexOf(a) > -1; })) {
       sentences_with_punc.push([]);
@@ -182,8 +196,32 @@ Mode.prototype.getStats = function(editor) {
   }
 
 
+  // acrostics.
+  var first_char_str = "";
+  for (var i = 0; i < sentences_wout_punc.length; i++) {
+    first_char_str += sentences_wout_punc[i][0].charAt(0);
+  }
+  first_char_str = first_char_str.toLowerCase();
+  var acrostics_score = 0;
+  var acrostics_matches = [];
+  for (var i = 0; i < valid_words.length; i++) {
+    // Find all matches
+    var j = first_char_str.indexOf(valid_words[i]);
+    while (j >= 0) {
+      // Process match.
+      var curr_match = [];
+      for (var k = j; k < j + valid_words[i].length; k++) {
+        acrostics_score += Math.pow(sentences_wout_punc[k].length, 2);
+        curr_match.push(sentences_wout_punc[k][0]);
+      }
+      acrostics_matches.push(curr_match.join(" "));
+      // Find next match.
+      j = first_char_str.indexOf(valid_words[i], j+1);
+    }
+  }
+
   // n-letter words.
-  var bucket_words = [];
+  var bucket_words = {};
   for (var i = 1; i <= 14; i++) {
     bucket_words[i] = 0;
   }
@@ -193,9 +231,17 @@ Mode.prototype.getStats = function(editor) {
   for (var sc_n_letter_words = 14; sc_n_letter_words > 0; sc_n_letter_words--) {
     if (bucket_words[sc_n_letter_words] == sc_n_letter_words) break;
   }
+  var n_letter_words_used = [];
+  if (sc_n_letter_words > 0) {
+    for (var i = 0; i < only_words.length; i++) {
+      if (only_words[i].length == sc_n_letter_words) {
+        n_letter_words_used.push(only_words[i]);
+      }
+    }
+  }
 
   // Letters of alphabet.
-  var buckets = [];
+  var buckets = {};
   for (var i = 65; i < 91; i++) {
     buckets[String.fromCharCode(i)] = 0;
   }
@@ -207,22 +253,62 @@ Mode.prototype.getStats = function(editor) {
     }
   }
   var odd_cnt = 0;
-  Object.keys(buckets).forEach(function(key, idx) {
-    if (this[key] % 2 == 1) {
+  var even_chars = [];
+  for (var i = 65; i < 91; i++) {
+    var key = String.fromCharCode(i);
+    if (buckets[key] % 2 == 1) {
       odd_cnt++;
+    } else {
+      even_chars.push(key);
     }
-  }, buckets);
+  }
 
   // Oscars.
   var oscars = window.__DESIRED_OSCARS.split("|");
   var oscars_count = 0;
+  var oscars_found = [];
   for (var i = 0; i < oscars.length; i++) {
     if (full_text.indexOf(oscars[i].toLowerCase()) > -1) {
       oscars_count++;
+      oscars_found.push(oscars[i]);
     }
   }
 
+  // Scrabble.
+  var words = new Array("abcdef", "queen");
+  var scrabble_scores = {"a": 1, "c": 3, "b": 3, "e": 1, "d": 2, "g": 2, "f": 4, "i": 1, "h": 4, "k": 5, "j": 8, "m": 3, "l": 1, "o": 1, "n": 1, "q": 10, "p": 3, "s": 1, "r": 1, "u": 1, "t": 1, "w": 4, "v": 4, "y": 4, "x": 8, "z": 10};
+
+  var word_cnt = {};
+  for (var i = 1; i <= 25; i++) {
+      word_cnt[i] = 0;
+  }
+
+  for (var i = 0; i < words.length; i++) {
+      var word_score = 0;
+      for (var j = 0; j < words[i].length; j++) {
+          word_score += scrabble_scores[words[i].charAt(j)];
+      }
+      if (word_cnt[word_score]) {
+          word_cnt[word_score]++;
+      } else {
+          word_cnt[word_score] = 1;
+      }
+  }
+
+  var best_scrabble_score = 0;
+  var best_scrabble_iden = 0;
+  for (var i = 1; i <= 25; i++) {
+      if (word_cnt[i] == 0) {
+          var curr_score = 15 * Math.exp(-Math.pow(Math.log(i/9), 2));
+          if (curr_score > best_scrabble_score) {
+              best_scrabble_score = curr_score;
+              best_scrabble_iden = i;
+          }
+      }
+  }
+
   // END.
+  function linkify(a) { return "<a>" + a + "</a>"; }
 
   return {
     "words": only_words.length,
@@ -231,51 +317,61 @@ Mode.prototype.getStats = function(editor) {
       "max_fac_n": {
         "raw": max_fac_n,
         "score": max_fac_n,
-        "extra_info": {
-          "sen_product": products_of_sentence_lengths,
-          "max_fac_div": max_fac_div,
-        },
+        "extra_info": "Product: "+products_of_sentence_lengths + "(divided by " + max_fac_div + ")",
       },
       "longest_increasing_run": {
         "raw": longest_run.length,
         "score": 3 * Math.sqrt(longest_run.length),
         "max": 3 * Math.sqrt(250),
-        "extra_info": "<a>"+longest_run.join(" ")+"</a>",
+        "extra_info": linkify(longest_run.join(" ")),
       },
       "element_run": {
         "raw": max_element_run.length,
         "score": Math.log(118) * Math.sqrt(max_element_run.length),
-        "max": Math.log(118) * Math.sqrt(__FILTERED_ELEMENTS.length),
-        "extra_info": "<a>" + max_element_run.join(" ") + "</a>",
+        "max": Math.log(118) * Math.sqrt(filtered_elements.length),
+        "extra_info": linkify(max_element_run.join(" ")),
       },
       "pi_run": {
         "raw": max_pi_run,
         "score": Math.PI * Math.sqrt(max_pi_run),
         "max": Math.PI * Math.sqrt(250),
-        "extra_info": "<a>"+only_words.slice(max_pi_run_start, max_pi_run_start+max_pi_run).join(" ")+"</a>",
+        "extra_info": linkify(only_words.slice(max_pi_run_start, max_pi_run_start+max_pi_run).join(" ")),
+      },
+      "acrostics_score": {
+        "raw": acrostics_score,
+        "score": Math.sqrt(acrostics_score),
+        "max": 250,
+        "extra_info": acrostics_matches.map(linkify).join(" | "),
       },
       "odd_cnt": {
         "raw": odd_cnt,
         "score": Math.pow(odd_cnt-13, 2)/13,
         "max": 13,
+        "extra_info": "Even: "+even_chars,
       },
       "n_letter_words": {
         "raw": sc_n_letter_words,
         "score": sc_n_letter_words,
         "max": 11,
-        "extra_info": bucket_words,
+        "extra_info": JSON.stringify(bucket_words) + "<br>" + n_letter_words_used,
       },
       "oscars": {
         "raw": oscars_count,
         "score": Math.log(87) * Math.min(5, oscars_count),
         "max": 22.33,
+        "extra_info": oscars_found.map(linkify).join(" | "),
+      },
+      "scrabble": {
+        "raw": best_scrabble_iden,
+        "score": best_scrabble_score,
+        "max": 15,
       },
     }
   };
 };
 
 Mode.prototype.onScoringAllowed = function(editor, cb) {
-  let self = this;
+  var self = this;
   editor.getSession().on('change', debounce(function() {
     cb(self.getStats(editor));
   }, 500));
